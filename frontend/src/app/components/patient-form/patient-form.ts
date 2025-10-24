@@ -42,7 +42,7 @@ export class PatientFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Inicializar formulario con validaciones
+   * Inicializar formulario 
    */
   initForm(): void {
     this.patientForm = this.formBuilder.group({
@@ -75,7 +75,7 @@ export class PatientFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Validador personalizado: fecha no puede ser futura
+   * Validador personalizado
    */
   dateNotFutureValidator(control: any) {
     if (!control.value) {
@@ -100,7 +100,7 @@ export class PatientFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Verificar si estamos en modo edición
+   * Valida si esta en modo edición
    */
   checkEditMode(): void {
     this.route.params
@@ -115,7 +115,7 @@ export class PatientFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cargar datos del paciente para editar
+   * Cargar datos del paciente a editar
    */
   loadPatient(id: number): void {
     this.loading = true;
@@ -126,7 +126,6 @@ export class PatientFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (patient: Patient) => {
-          // Formatear fecha para el input type="date"
           const birthDate = patient.BIRTH_DATE.split('T')[0];
           
           this.patientForm.patchValue({
@@ -146,15 +145,12 @@ export class PatientFormComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Getters para facilitar acceso a los controles del formulario
-   */
   get f() {
     return this.patientForm.controls;
   }
 
   /**
-   * Verificar si un campo tiene error
+   * Verifica si el campo tiene error
    */
   hasError(fieldName: string, errorType?: string): boolean {
     const field = this.patientForm.get(fieldName);
@@ -168,7 +164,7 @@ export class PatientFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Obtener mensaje de error para un campo
+   *  Error para un campo
    */
   getErrorMessage(fieldName: string): string {
     const field = this.patientForm.get(fieldName);
@@ -296,7 +292,7 @@ export class PatientFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Marcar todos los campos como tocados para mostrar errores
+   * Marcar todos los campos
    */
   private markFormGroupTouched(formGroup: FormGroup): void {
     Object.keys(formGroup.controls).forEach(key => {
@@ -319,7 +315,7 @@ export class PatientFormComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Obtener fecha de hoy en formato YYYY-MM-DD para el input date
+   * Obtener fecha de hoy en formato YYYY-MM-DD
    */
   getTodayDate(): string {
     const today = new Date();

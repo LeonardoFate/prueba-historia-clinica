@@ -41,13 +41,12 @@ export class PatientList implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Verificar si hay mensaje de éxito en query params
+    // Verificar si hay mensaje de éxito
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
         if (params['success']) {
           this.success = params['success'];
-          // Limpiar el query param después de mostrarlo
           setTimeout(() => {
             this.router.navigate([], {
               queryParams: {},
@@ -57,7 +56,7 @@ export class PatientList implements OnInit, OnDestroy {
         }
       });
 
-    // Configurar debounce para búsqueda
+    // debounce para búsqueda
     this.searchSubject
       .pipe(
         debounceTime(500),
@@ -69,7 +68,7 @@ export class PatientList implements OnInit, OnDestroy {
         this.loadPatients();
       });
 
-    // Cargar pacientes inicial
+    // Cargar pacientes 
     this.loadPatients();
   }
 
@@ -108,7 +107,7 @@ export class PatientList implements OnInit, OnDestroy {
   }
 
   /**
-   * Generar números de página para la paginación
+   * Generar números de página
    */
   generatePageNumbers(): void {
     this.pages = [];

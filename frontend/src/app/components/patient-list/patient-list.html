@@ -1,6 +1,5 @@
 
 <div class="container mt-4">
-  <!-- Encabezado -->
   <div class="row mb-4">
     <div class="col-md-6">
       <h2>
@@ -22,7 +21,6 @@
     </div>
   </div>
 
-  <!-- Mensajes de éxito/error -->
   <div *ngIf="success" class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="bi bi-check-circle-fill"></i>
     {{ success }}
@@ -65,7 +63,6 @@
     </div>
   </div>
 
-  <!-- Loading Spinner -->
   <div *ngIf="loading" class="text-center my-5">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
@@ -73,7 +70,6 @@
     <p class="mt-2">Cargando pacientes...</p>
   </div>
 
-  <!-- Tabla de Pacientes -->
   <div *ngIf="!loading" class="table-responsive">
     <table class="table table-hover table-striped">
       <thead class="table-dark">
@@ -88,7 +84,6 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Sin resultados -->
         <tr *ngIf="patients.length === 0">
           <td colspan="7" class="text-center py-5">
             <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
@@ -104,7 +99,6 @@
           </td>
         </tr>
 
-        <!-- Lista de pacientes -->
         <tr *ngFor="let patient of patients">
           <td>{{ patient.ID }}</td>
           <td>
@@ -143,7 +137,6 @@
     </table>
   </div>
 
-  <!-- Paginación -->
   <nav *ngIf="!loading && totalPages > 1" aria-label="Paginación de pacientes">
     <ul class="pagination justify-content-center">
       <!-- Primera página -->
@@ -160,7 +153,6 @@
         </button>
       </li>
 
-      <!-- Números de página -->
       <li 
         *ngFor="let page of pages" 
         class="page-item" 
@@ -170,14 +162,12 @@
         </button>
       </li>
 
-      <!-- Página siguiente -->
       <li class="page-item" [class.disabled]="currentPage === totalPages">
         <button class="page-link" (click)="nextPage()" [disabled]="currentPage === totalPages">
           <i class="bi bi-chevron-right"></i>
         </button>
       </li>
 
-      <!-- Última página -->
       <li class="page-item" [class.disabled]="currentPage === totalPages">
         <button class="page-link" (click)="goToPage(totalPages)" [disabled]="currentPage === totalPages">
           <i class="bi bi-chevron-double-right"></i>

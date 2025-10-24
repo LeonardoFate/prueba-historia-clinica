@@ -1,5 +1,3 @@
-// src/app/services/patient.service.ts
-
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -117,10 +115,10 @@ export class PatientService {
     let errorMessage = 'Ocurrió un error desconocido';
 
     if (error.error instanceof ErrorEvent) {
-      // Error del cliente
+
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Error del servidor
+
       if (error.error?.message) {
         errorMessage = error.error.message;
       } else if (error.status === 0) {

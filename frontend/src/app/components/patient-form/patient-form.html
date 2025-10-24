@@ -1,5 +1,4 @@
 <div class="container mt-4">
-  <!-- Encabezado -->
   <div class="row mb-4">
     <div class="col-12">
       <h2>
@@ -19,14 +18,13 @@
     </div>
   </div>
 
-  <!-- Mensaje de error -->
   <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="bi bi-exclamation-triangle-fill"></i>
     {{ error }}
     <button type="button" class="btn-close" (click)="error = ''"></button>
   </div>
 
-  <!-- Loading -->
+
   <div *ngIf="loading && isEditMode" class="text-center my-5">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
@@ -34,7 +32,7 @@
     <p class="mt-2">Cargando datos del paciente...</p>
   </div>
 
-  <!-- Formulario -->
+
   <div *ngIf="!loading || !isEditMode" class="card shadow">
     <div class="card-body p-4">
       <form [formGroup]="patientForm" (ngSubmit)="onSubmit()" novalidate>
@@ -57,7 +55,6 @@
             </div>
           </div>
 
-          <!-- Apellidos -->
           <div class="col-md-6 mb-3">
             <label for="lastName" class="form-label required">
               Apellidos
@@ -100,7 +97,6 @@
             </div>
           </div>
 
-          <!-- Teléfono -->
           <div class="col-md-6 mb-3">
             <label for="phone" class="form-label required">
               Teléfono
@@ -153,7 +149,6 @@
           </div>
         </div>
 
-        <!-- Indicador de campos requeridos -->
         <div class="row mt-2">
           <div class="col-12">
             <small class="text-muted">
@@ -192,7 +187,6 @@
     </div>
   </div>
 
-  <!-- Información adicional -->
   <div class="card mt-4 border-info">
     <div class="card-body">
       <h5 class="card-title">
