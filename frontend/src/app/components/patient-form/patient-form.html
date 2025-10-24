@@ -1,0 +1,213 @@
+<p>patient-form works!</p>
+<!-- src/app/components/patient-form/patient-form.component.html -->
+
+<div class="container mt-4">
+  <!-- Encabezado -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2>
+        <i class="bi" [class.bi-person-plus]="!isEditMode" [class.bi-pencil-square]="isEditMode"></i>
+        {{ isEditMode ? 'Editar Paciente' : 'Nuevo Paciente' }}
+      </h2>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a routerLink="/patients">Pacientes</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            {{ isEditMode ? 'Editar' : 'Nuevo' }}
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = ''"></button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading && isEditMode" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2">Cargando datos del paciente...</p>
+  </div>
+
+  <!-- Formulario -->
+  <div *ngIf="!loading || !isEditMode" class="card shadow">
+    <div class="card-body p-4">
+      <form [formGroup]="patientForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="row">
+          <!-- Nombres -->
+          <div class="col-md-6 mb-3">
+            <label for="firstName" class="form-label required">
+              Nombres
+            </label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="firstName"
+              formControlName="firstName"
+              [class.is-invalid]="hasError('firstName')"
+              [class.is-valid]="f['firstName'].valid && (f['firstName'].dirty || f['firstName'].touched)"
+              placeholder="Ingrese los nombres">
+            <div class="invalid-feedback" *ngIf="hasError('firstName')">
+              {{ getErrorMessage('firstName') }}
+            </div>
+          </div>
+
+          <!-- Apellidos -->
+          <div class="col-md-6 mb-3">
+            <label for="lastName" class="form-label required">
+              Apellidos
+            </label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="lastName"
+              formControlName="lastName"
+              [class.is-invalid]="hasError('lastName')"
+              [class.is-valid]="f['lastName'].valid && (f['lastName'].dirty || f['lastName'].touched)"
+              placeholder="Ingrese los apellidos">
+            <div class="invalid-feedback" *ngIf="hasError('lastName')">
+              {{ getErrorMessage('lastName') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Email -->
+          <div class="col-md-6 mb-3">
+            <label for="email" class="form-label required">
+              Email
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-envelope"></i>
+              </span>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email"
+                formControlName="email"
+                [class.is-invalid]="hasError('email')"
+                [class.is-valid]="f['email'].valid && (f['email'].dirty || f['email'].touched)"
+                placeholder="correo@ejemplo.com">
+              <div class="invalid-feedback" *ngIf="hasError('email')">
+                {{ getErrorMessage('email') }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Teléfono -->
+          <div class="col-md-6 mb-3">
+            <label for="phone" class="form-label required">
+              Teléfono
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-telephone"></i>
+              </span>
+              <input 
+                type="tel" 
+                class="form-control" 
+                id="phone"
+                formControlName="phone"
+                [class.is-invalid]="hasError('phone')"
+                [class.is-valid]="f['phone'].valid && (f['phone'].dirty || f['phone'].touched)"
+                placeholder="0999999999"
+                maxlength="10">
+              <div class="invalid-feedback" *ngIf="hasError('phone')">
+                {{ getErrorMessage('phone') }}
+              </div>
+            </div>
+            <small class="form-text text-muted">
+              10 dígitos sin espacios ni guiones
+            </small>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Fecha de Nacimiento -->
+          <div class="col-md-6 mb-3">
+            <label for="birthDate" class="form-label required">
+              Fecha de Nacimiento
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-calendar"></i>
+              </span>
+              <input 
+                type="date" 
+                class="form-control" 
+                id="birthDate"
+                formControlName="birthDate"
+                [class.is-invalid]="hasError('birthDate')"
+                [class.is-valid]="f['birthDate'].valid && (f['birthDate'].dirty || f['birthDate'].touched)"
+                [max]="getTodayDate()">
+              <div class="invalid-feedback" *ngIf="hasError('birthDate')">
+                {{ getErrorMessage('birthDate') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicador de campos requeridos -->
+        <div class="row mt-2">
+          <div class="col-12">
+            <small class="text-muted">
+              <span class="required"></span> Campos obligatorios
+            </small>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="d-flex gap-2 justify-content-end">
+              <button 
+                type="button" 
+                class="btn btn-secondary" 
+                (click)="cancel()"
+                [disabled]="loading">
+                <i class="bi bi-x-circle"></i>
+                Cancelar
+              </button>
+              
+              <button 
+                type="submit" 
+                class="btn btn-primary" 
+                [disabled]="loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status">
+                  <span class="visually-hidden">Guardando...</span>
+                </span>
+                <i *ngIf="!loading" class="bi bi-save"></i>
+                {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Guardar') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="card mt-4 border-info">
+    <div class="card-body">
+      <h5 class="card-title">
+        <i class="bi bi-info-circle"></i>
+        Información
+      </h5>
+      <ul class="mb-0">
+        <li>Todos los campos son obligatorios</li>
+        <li>El email debe ser único para cada paciente</li>
+        <li>El teléfono debe contener exactamente 10 dígitos</li>
+        <li>La fecha de nacimiento no puede ser futura</li>
+      </ul>
+    </div>
+  </div>
+</div>
