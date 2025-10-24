@@ -51,10 +51,3 @@ npm install
 ng serve  # Puerto 4200
 ```
 
-## Decisiones Técnicas
-
-1. **Connection Pool**: Configurado con min=2, max=10 para optimizar rendimiento
-2. **Bind Variables**: Usadas en todas las queries para prevenir SQL injection
-3. **Rate Limiting**: Implementado en dos niveles (general y estricto)
-4. **Standalone Components**: Angular 19 con arquitectura moderna
-5. **Reactive Forms**: Para validación robusta en frontend
