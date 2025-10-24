@@ -143,8 +143,6 @@ npm run test:watch
 # Tests de integración
 npm run test:integration
 
-# Tests unitarios
-npm run test:unit
 ```
 
 ### Frontend (Jasmine/Karma)
@@ -157,11 +155,6 @@ npm test
 # o
 ng test
 
-# Tests con coverage
-ng test --code-coverage
-
-# Tests headless (CI/CD)
-ng test --browsers=ChromeHeadless --watch=false
 ```
 
 ## Troubleshooting
