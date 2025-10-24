@@ -68,16 +68,22 @@ npm install
 Crear archivo `.env` en la raíz del backend:
 
 ```env
-# Database Configuration
-DB_USER=tu_usuario
-DB_PASSWORD=tu_password
-DB_CONNECTION_STRING=localhost:1521/FREEPDB1
+DB_USER=usuario
+DB_PASSWORD=contrasenia
+DB_CONNECTION_STRING=localhost:1521/XEPDB1
+
+# Connection Pool Configuration
+POOL_MIN=2
+POOL_MAX=10
+POOL_INCREMENT=2
 
 # Server Configuration
 PORT=3000
+NODE_ENV=development
 
-# JWT Configuration
-JWT_SECRET=tu_clave_secreta_aqui
+# CORS Configuration
+ALLOWED_ORIGINS=http://localhost:4200
+
 ```
 
 4. **Iniciar el servidor:**
