@@ -20,7 +20,7 @@ describe('Patient Routes Integration', () => {
       .expect(200);
 
     expect(response.body).toHaveProperty('success', true);
-    expect(response.body).toHaveProperty('message', 'Patient Management System API');
+    expect(response.body).toHaveProperty('message', 'Prueba Practica API');
   });
 
   test('GET /api/unknown-route should return 404', async () => {
@@ -29,6 +29,6 @@ describe('Patient Routes Integration', () => {
       .expect(404);
 
     expect(response.body).toHaveProperty('success', false);
-    expect(response.body).toHaveProperty('message', 'Route not found');
+    expect(response.body).toHaveProperty('message', 'Ruta no encontrada');
   });
 });

@@ -117,6 +117,8 @@ async function getPatientById(id) {
 
 // Verificr si el email ya existe
 async function emailExists(connection, email, excludeId = null) {
+
+  
   try {
     let query = 'SELECT COUNT(*) as COUNT FROM PATIENTS WHERE UPPER(EMAIL) = :email';
     const binds = { email: email.toUpperCase() };

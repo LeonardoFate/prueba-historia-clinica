@@ -5,83 +5,129 @@ const {
   validationErrorResponse
 } = require('../../src/utils/responses');
 
-describe('Response Helpers', () => {
-  let res;
+describe('Response Utilities', () => {
+  let mockRes;
 
   beforeEach(() => {
-    res = {
+    mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis()
     };
   });
 
   describe('successResponse', () => {
-    test('should return success response with default status 200', () => {
+    test('debe retornar respuesta exitosa con status 200 por defecto', () => {
       const data = { id: 1, name: 'Test' };
-      successResponse(res, data, 'Success');
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
+      
+      successResponse(mockRes, data, 'Operación exitosa');
+      
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Success',
+        message: 'Operación exitosa',
         data
       });
     });
 
-    test('should return success response with custom status', () => {
-      successResponse(res, null, 'Created', 201);
-
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
+    test('debe aceptar status code personalizado', () => {
+      const data = { id: 1 };
+      
+      successResponse(mockRes, data, 'Creado', 201);
+      
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Created',
-        data: null
+        message: 'Creado',
+        data
+      });
+    });
+
+    test('debe usar mensaje por defecto si no se proporciona', () => {
+      successResponse(mockRes, {});
+      
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Success',
+        data: {}
       });
     });
   });
 
   describe('errorResponse', () => {
-    test('should return error response', () => {
-      errorResponse(res, 'Error occurred', 500);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+    test('debe retornar respuesta de error con status 500 por defecto', () => {
+      errorResponse(mockRes, 'Error interno');
+      
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Error occurred'
+        message: 'Error interno'
       });
     });
 
-    test('should include errors if provided', () => {
-      const errors = ['Error 1', 'Error 2'];
-      errorResponse(res, 'Validation failed', 400, errors);
-
-      expect(res.json).toHaveBeenCalledWith({
+    test('debe aceptar status code personalizado', () => {
+      errorResponse(mockRes, 'No autorizado', 401);
+      
+      expect(mockRes.status).toHaveBeenCalledWith(401);
+      expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Validation failed',
+        message: 'No autorizado'
+      });
+    });
+
+    test('debe incluir errores adicionales si se proporcionan', () => {
+      const errors = ['Error 1', 'Error 2'];
+      
+      errorResponse(mockRes, 'Errores múltiples', 400, errors);
+      
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Errores múltiples',
         errors
+      });
+    });
+
+    test('debe usar mensaje por defecto si no se proporciona', () => {
+      errorResponse(mockRes);
+      
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Error'
       });
     });
   });
 
   describe('notFoundResponse', () => {
-    test('should return 404 response', () => {
-      notFoundResponse(res, 'Not found');
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
+    test('debe retornar respuesta 404', () => {
+      notFoundResponse(mockRes, 'Recurso no encontrado');
+      
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Not found'
+        message: 'Recurso no encontrado'
+      });
+    });
+
+    test('debe usar mensaje por defecto', () => {
+      notFoundResponse(mockRes);
+      
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Resource not found'
       });
     });
   });
 
   describe('validationErrorResponse', () => {
-    test('should return 400 validation error', () => {
-      const errors = ['Field required'];
-      validationErrorResponse(res, errors);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
+    test('debe retornar respuesta 400 con errores de validación', () => {
+      const errors = [
+        'El nombre es obligatorio',
+        'El email no es válido'
+      ];
+      
+      validationErrorResponse(mockRes, errors);
+      
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Validation failed',
         errors
