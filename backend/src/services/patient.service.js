@@ -102,24 +102,25 @@ async function getPatientById(id) {
     
     return result.rows[0] || null;
   } catch (error) {
-    console.error('Error in getPatientById:', error);
+    console.error('ERROR en getPatientById:', error);
     throw error;
   } finally {
     if (connection) {
       try {
         await connection.close();
       } catch (err) {
-        console.error('Error closing connection:', err);
+        console.error('ERROR cerrando conexion:', err);
       }
     }
   }
 }
 
-// Verificr si el email ya existe
-async function emailExists(connection, email, excludeId = null) {
-
+async function emailExists(email, excludeId = null) {
+  let connection;
   
   try {
+    connection = await database.getConnection();
+    
     let query = 'SELECT COUNT(*) as COUNT FROM PATIENTS WHERE UPPER(EMAIL) = :email';
     const binds = { email: email.toUpperCase() };
     
@@ -134,8 +135,16 @@ async function emailExists(connection, email, excludeId = null) {
     
     return result.rows[0].COUNT > 0;
   } catch (error) {
-    console.error('Error in emailExists:', error);
+    console.error('ERROR en emailExists:', error);
     throw error;
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error('ERROR cerrando conexion en emailExists:', err);
+      }
+    }
   }
 }
 
@@ -147,8 +156,8 @@ async function createPatient(patientData) {
   try {
     connection = await database.getConnection();
     
-    // Verificar si el email ya existe usando la misma conexión
-    const exists = await emailExists(connection, patientData.email);
+    // ✅ CORRECCIÓN: Ya no pasamos la conexión a emailExists
+    const exists = await emailExists(patientData.email);
     if (exists) {
       throw new Error('EMAIL_ALREADY_EXISTS');
     }
@@ -193,17 +202,17 @@ async function createPatient(patientData) {
       try {
         await connection.rollback();
       } catch (rollbackErr) {
-        console.error('Error rolling back:', rollbackErr);
+        console.error('ERROR rolling back:', rollbackErr);
       }
     }
-    console.error('Error in createPatient:', error);
+    console.error('ERROR en createPatient:', error);
     throw error;
   } finally {
     if (connection) {
       try {
         await connection.close();
       } catch (err) {
-        console.error('Error closing connection:', err);
+        console.error('ERROR cerrando conexion:', err);
       }
     }
   }
@@ -223,8 +232,8 @@ async function updatePatient(id, patientData) {
       return null;
     }
     
-    // Verificar si el email ya existe excluyendo el id actual
-    const emailInUse = await emailExists(connection, patientData.email, id);
+    // ✅ CORRECCIÓN: Ya no pasamos la conexión a emailExists
+    const emailInUse = await emailExists(patientData.email, id);
     if (emailInUse) {
       throw new Error('EMAIL_ALREADY_EXISTS');
     }
@@ -261,17 +270,17 @@ async function updatePatient(id, patientData) {
       try {
         await connection.rollback();
       } catch (rollbackErr) {
-        console.error('Error rolling back:', rollbackErr);
+        console.error('ERROR rolling back:', rollbackErr);
       }
     }
-    console.error('Error in updatePatient:', error);
+    console.error('ERROR en updatePatient:', error);
     throw error;
   } finally {
     if (connection) {
       try {
         await connection.close();
       } catch (err) {
-        console.error('Error closing connection:', err);
+        console.error('ERROR cerrando conexion:', err);
       }
     }
   }
@@ -301,17 +310,17 @@ async function deletePatient(id) {
       try {
         await connection.rollback();
       } catch (rollbackErr) {
-        console.error('Error rolling back:', rollbackErr);
+        console.error('ERROR rolling back:', rollbackErr);
       }
     }
-    console.error('Error in deletePatient:', error);
+    console.error('ERROR en deletePatient:', error);
     throw error;
   } finally {
     if (connection) {
       try {
         await connection.close();
       } catch (err) {
-        console.error('Error closing connection:', err);
+        console.error('ERROR cerrando conexion:', err);
       }
     }
   }
