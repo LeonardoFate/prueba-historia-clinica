@@ -1,16 +1,18 @@
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { PatientService } from '../../services/patient.service';
-import { Patient, PatientCreate, PatientUpdate } from '../../models/patient.model';
+import { PatientService } from '../../services/patient';
+import { Patient, PatientCreate, PatientUpdate } from '../../models/patient';
 
 @Component({
   selector: 'app-patient-form',
-  templateUrl: './patient-form.component.html',
-  styleUrls: ['./patient-form.component.css']
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  templateUrl: './patient-form.html',
+  styleUrls: ['./patient-form.css']
 })
 export class PatientFormComponent implements OnInit, OnDestroy {
   patientForm!: FormGroup;
