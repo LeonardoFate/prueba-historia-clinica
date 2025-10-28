@@ -1,57 +1,37 @@
-const oracledb = require('oracledb');
-const database = require('../config/database');
+// Mock data en lugar de Oracle
+const { mockPatients } = require('../data/mockData');
+
+// Variable para simular la base de datos en memoria
+let patients = [...mockPatients];
+let nextId = Math.max(...patients.map(p => p.ID)) + 1;
 
 // Obtiene los pacientes con paginación y búsqueda
 async function getAllPatients(page = 1, limit = 10, search = '') {
-  let connection;
-  
   try {
-    connection = await database.getConnection();
-    
-    const offset = (page - 1) * limit;
-    
-    // bind variables
-    let query = `
-      SELECT 
-        ID,
-        FIRST_NAME,
-        LAST_NAME,
-        EMAIL,
-        PHONE,
-        BIRTH_DATE,
-        CREATED_AT,
-        UPDATED_AT
-      FROM PATIENTS
-    `;
-    
-    let countQuery = 'SELECT COUNT(*) as TOTAL FROM PATIENTS';
-    let binds = {};
+    // Filtrar por búsqueda si existe
+    let filteredPatients = [...patients];
     
     if (search && search.trim()) {
-      const searchCondition = ` WHERE UPPER(FIRST_NAME) LIKE :search OR UPPER(LAST_NAME) LIKE :search`;
-      query += searchCondition;
-      countQuery += searchCondition;
-      binds.search = `%${search.toUpperCase()}%`;
+      const searchTerm = search.toUpperCase();
+      filteredPatients = patients.filter(p => 
+        p.FIRST_NAME.toUpperCase().includes(searchTerm) ||
+        p.LAST_NAME.toUpperCase().includes(searchTerm)
+      );
     }
-  
-    query += ` ORDER BY CREATED_AT DESC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`;
-    binds.offset = offset;
-    binds.limit = limit;
     
-    const result = await connection.execute(query, binds, {
-      outFormat: oracledb.OUT_FORMAT_OBJECT
-    });
-    
-    const countResult = await connection.execute(countQuery, 
-      search && search.trim() ? { search: binds.search } : {}, 
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    // Ordenar por fecha de creación (descendente)
+    filteredPatients.sort((a, b) => 
+      new Date(b.CREATED_AT) - new Date(a.CREATED_AT)
     );
     
-    const total = countResult.rows[0].TOTAL;
+    // Paginación
+    const total = filteredPatients.length;
     const totalPages = Math.ceil(total / limit);
+    const offset = (page - 1) * limit;
+    const paginatedPatients = filteredPatients.slice(offset, offset + limit);
     
     return {
-      patients: result.rows,
+      patients: paginatedPatients,
       pagination: {
         currentPage: parseInt(page),
         totalPages,
@@ -62,267 +42,111 @@ async function getAllPatients(page = 1, limit = 10, search = '') {
   } catch (error) {
     console.error('ERROR en getAllPatients:', error);
     throw error;
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('ERROR cerrando conexion:', err);
-      }
-    }
   }
 }
 
 // Obtener paciente por id
 async function getPatientById(id) {
-  let connection;
-  
   try {
-    connection = await database.getConnection();
-    
-    const query = `
-      SELECT 
-        ID,
-        FIRST_NAME,
-        LAST_NAME,
-        EMAIL,
-        PHONE,
-        BIRTH_DATE,
-        CREATED_AT,
-        UPDATED_AT
-      FROM PATIENTS
-      WHERE ID = :id
-    `;
-    
-    const result = await connection.execute(
-      query,
-      { id },
-      { outFormat: oracledb.OUT_FORMAT_OBJECT }
-    );
-    
-    return result.rows[0] || null;
+    const patient = patients.find(p => p.ID === parseInt(id));
+    return patient || null;
   } catch (error) {
     console.error('ERROR en getPatientById:', error);
     throw error;
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('ERROR cerrando conexion:', err);
-      }
-    }
   }
 }
 
+// Verificar si el email ya existe
 async function emailExists(email, excludeId = null) {
-  let connection;
-  
   try {
-    connection = await database.getConnection();
-    
-    let query = 'SELECT COUNT(*) as COUNT FROM PATIENTS WHERE UPPER(EMAIL) = :email';
-    const binds = { email: email.toUpperCase() };
-    
-    if (excludeId) {
-      query += ' AND ID != :excludeId';
-      binds.excludeId = excludeId;
-    }
-    
-    const result = await connection.execute(query, binds, {
-      outFormat: oracledb.OUT_FORMAT_OBJECT
-    });
-    
-    return result.rows[0].COUNT > 0;
+    const exists = patients.some(p => 
+      p.EMAIL.toUpperCase() === email.toUpperCase() && 
+      (!excludeId || p.ID !== excludeId)
+    );
+    return exists;
   } catch (error) {
     console.error('ERROR en emailExists:', error);
     throw error;
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('ERROR cerrando conexion en emailExists:', err);
-      }
-    }
   }
 }
 
-
 // Crear nuevo paciente
 async function createPatient(patientData) {
-  let connection;
-  
   try {
-    connection = await database.getConnection();
-    
-    // ✅ CORRECCIÓN: Ya no pasamos la conexión a emailExists
+    // Verificar email único
     const exists = await emailExists(patientData.email);
     if (exists) {
       throw new Error('EMAIL_ALREADY_EXISTS');
     }
     
-    const query = `
-      INSERT INTO PATIENTS (
-        ID,
-        FIRST_NAME,
-        LAST_NAME,
-        EMAIL,
-        PHONE,
-        BIRTH_DATE
-      ) VALUES (
-        SEQ_PATIENTS.NEXTVAL,
-        :firstName,
-        :lastName,
-        :email,
-        :phone,
-        TO_DATE(:birthDate, 'YYYY-MM-DD')
-      ) RETURNING ID INTO :id
-    `;
-    
-    const binds = {
-      firstName: patientData.firstName,
-      lastName: patientData.lastName,
-      email: patientData.email,
-      phone: patientData.phone,
-      birthDate: patientData.birthDate,
-      id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+    // Crear nuevo paciente
+    const newPatient = {
+      ID: nextId++,
+      FIRST_NAME: patientData.firstName,
+      LAST_NAME: patientData.lastName,
+      EMAIL: patientData.email,
+      PHONE: patientData.phone,
+      BIRTH_DATE: patientData.birthDate,
+      CREATED_AT: new Date().toISOString(),
+      UPDATED_AT: new Date().toISOString()
     };
     
-    const result = await connection.execute(query, binds, { autoCommit: false });
-    await connection.commit();
-    
-    const newId = result.outBinds.id[0];
-    
-    const newPatient = await getPatientById(newId);
+    patients.push(newPatient);
     
     return newPatient;
   } catch (error) {
-    if (connection) {
-      try {
-        await connection.rollback();
-      } catch (rollbackErr) {
-        console.error('ERROR rolling back:', rollbackErr);
-      }
-    }
     console.error('ERROR en createPatient:', error);
     throw error;
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('ERROR cerrando conexion:', err);
-      }
-    }
   }
 }
 
-
 // Actualiza un paciente existente
 async function updatePatient(id, patientData) {
-  let connection;
-  
   try {
-    connection = await database.getConnection();
+    const index = patients.findIndex(p => p.ID === parseInt(id));
     
-    // Verificar si el paciente existe
-    const existingPatient = await getPatientById(id);
-    if (!existingPatient) {
+    if (index === -1) {
       return null;
     }
     
-    // ✅ CORRECCIÓN: Ya no pasamos la conexión a emailExists
-    const emailInUse = await emailExists(patientData.email, id);
+    // Verificar email único (excluyendo el paciente actual)
+    const emailInUse = await emailExists(patientData.email, parseInt(id));
     if (emailInUse) {
       throw new Error('EMAIL_ALREADY_EXISTS');
     }
     
-    const query = `
-      UPDATE PATIENTS
-      SET 
-        FIRST_NAME = :firstName,
-        LAST_NAME = :lastName,
-        EMAIL = :email,
-        PHONE = :phone,
-        BIRTH_DATE = TO_DATE(:birthDate, 'YYYY-MM-DD'),
-        UPDATED_AT = SYSTIMESTAMP
-      WHERE ID = :id
-    `;
-    
-    const binds = {
-      id,
-      firstName: patientData.firstName,
-      lastName: patientData.lastName,
-      email: patientData.email,
-      phone: patientData.phone,
-      birthDate: patientData.birthDate
+    // Actualizar paciente
+    patients[index] = {
+      ...patients[index],
+      FIRST_NAME: patientData.firstName,
+      LAST_NAME: patientData.lastName,
+      EMAIL: patientData.email,
+      PHONE: patientData.phone,
+      BIRTH_DATE: patientData.birthDate,
+      UPDATED_AT: new Date().toISOString()
     };
     
-    await connection.execute(query, binds, { autoCommit: false });
-    await connection.commit();
-    
-    const updatedPatient = await getPatientById(id);
-    
-    return updatedPatient;
+    return patients[index];
   } catch (error) {
-    if (connection) {
-      try {
-        await connection.rollback();
-      } catch (rollbackErr) {
-        console.error('ERROR rolling back:', rollbackErr);
-      }
-    }
     console.error('ERROR en updatePatient:', error);
     throw error;
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('ERROR cerrando conexion:', err);
-      }
-    }
   }
 }
 
 // Eliminar paciente
 async function deletePatient(id) {
-  let connection;
-  
   try {
-    connection = await database.getConnection();
+    const index = patients.findIndex(p => p.ID === parseInt(id));
     
-    // Verificar si el paciente existe
-    const existingPatient = await getPatientById(id);
-    if (!existingPatient) {
+    if (index === -1) {
       return false;
     }
     
-    const query = 'DELETE FROM PATIENTS WHERE ID = :id';
-    
-    await connection.execute(query, { id }, { autoCommit: false });
-    await connection.commit();
-    
+    patients.splice(index, 1);
     return true;
   } catch (error) {
-    if (connection) {
-      try {
-        await connection.rollback();
-      } catch (rollbackErr) {
-        console.error('ERROR rolling back:', rollbackErr);
-      }
-    }
     console.error('ERROR en deletePatient:', error);
     throw error;
-  } finally {
-    if (connection) {
-      try {
-        await connection.close();
-      } catch (err) {
-        console.error('ERROR cerrando conexion:', err);
-      }
-    }
   }
 }
 

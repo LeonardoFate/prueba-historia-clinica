@@ -1,18 +1,6 @@
-// manejo centralizado de errores
+// Manejo centralizado de errores
 function errorHandler(err, req, res, next) {
   console.error('Error:', err);
-
-  // Error de Base de Datos
-  if (err.errorNum) {
-    return res.status(500).json({
-      success: false,
-      message: 'Error de base de datos',
-      error: {
-        code: err.errorNum,
-        message: err.message
-      }
-    });
-  }
 
   // Error de validación
   if (err.name === 'ValidationError') {
@@ -30,8 +18,7 @@ function errorHandler(err, req, res, next) {
   });
 }
 
-// rutas no encontradas
-
+// Rutas no encontradas
 function notFound(req, res) {
   res.status(404).json({
     success: false,

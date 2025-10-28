@@ -7,14 +7,13 @@ const {
   validationErrorResponse
 } = require('../utils/responses');
 
-// /api/patients
+// GET /api/patients
 async function getAllPatients(req, res) {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search || '';
     
-  
     if (page < 1) {
       return errorResponse(res, 'La página debe ser mayor que 0', 400);
     }
@@ -27,34 +26,34 @@ async function getAllPatients(req, res) {
     
     return successResponse(res, result, 'Pacientes obtenidos exitosamente');
   } catch (error) {
-    console.error('ERROR en el controlador obtenerTodosLosPacientes:', error);
+    console.error('ERROR en controlador getAllPatients:', error);
     return errorResponse(res, 'Error al obtener los pacientes', 500);
   }
 }
 
-// /api/patients/:id
+// GET /api/patients/:id
 async function getPatientById(req, res) {
   try {
     const id = parseInt(req.params.id);
     
     if (isNaN(id) || id < 1) {
-      return errorResponse(res, 'id del paciente no valido', 400);
+      return errorResponse(res, 'ID del paciente no válido', 400);
     }
     
     const patient = await patientService.getPatientById(id);
     
     if (!patient) {
-      return notFoundResponse(res, 'No se encontro al paciente');
+      return notFoundResponse(res, 'Paciente no encontrado');
     }
     
     return successResponse(res, patient, 'Paciente obtenido exitosamente');
   } catch (error) {
-    console.error('ERROR en el controlador obtenerPacientePorId:', error);
+    console.error('ERROR en controlador getPatientById:', error);
     return errorResponse(res, 'Error al obtener el paciente', 500);
   }
 }
 
-// /api/patients
+// POST /api/patients
 async function createPatient(req, res) {
   try {
     const patientData = req.body;
@@ -68,33 +67,26 @@ async function createPatient(req, res) {
     // Crear paciente
     const newPatient = await patientService.createPatient(patientData);
     
-    return successResponse(res, newPatient, 'Paciente se creo con exito', 201);
+    return successResponse(res, newPatient, 'Paciente creado exitosamente', 201);
   } catch (error) {
-    console.error('ERROR en el controlador createPatien:', error);
+    console.error('ERROR en controlador createPatient:', error);
     
     if (error.message === 'EMAIL_ALREADY_EXISTS') {
       return errorResponse(res, 'El correo ya existe', 409);
-    }
-    
-    // Errors de Oracle
-    if (error.errorNum) {
-      if (error.errorNum === 1) {
-        return errorResponse(res, 'El correo ya existe', 409);
-      }
     }
     
     return errorResponse(res, 'Error al crear el paciente', 500);
   }
 }
 
-// /api/patients/:id
+// PUT /api/patients/:id
 async function updatePatient(req, res) {
   try {
     const id = parseInt(req.params.id);
     const patientData = req.body;
     
     if (isNaN(id) || id < 1) {
-      return errorResponse(res, 'id del paciente no es valido', 400);
+      return errorResponse(res, 'ID del paciente no válido', 400);
     }
     
     // Validar datos
@@ -112,31 +104,23 @@ async function updatePatient(req, res) {
     
     return successResponse(res, updatedPatient, 'Paciente actualizado exitosamente');
   } catch (error) {
-    console.error('ERROR en el controlador updatePatient:', error);
+    console.error('ERROR en controlador updatePatient:', error);
     
     if (error.message === 'EMAIL_ALREADY_EXISTS') {
       return errorResponse(res, 'El correo electrónico ya existe', 409);
     }
     
- 
-    if (error.errorNum) {
-      if (error.errorNum === 1) {
-        return errorResponse(res, 'El correo electrónico ya existe', 409);
-      }
-    }
-    
-    return errorResponse(res, 'ERROR al actualizar paciente', 500);
+    return errorResponse(res, 'Error al actualizar el paciente', 500);
   }
 }
 
-// /api/patients/:id
-
+// DELETE /api/patients/:id
 async function deletePatient(req, res) {
   try {
     const id = parseInt(req.params.id);
     
     if (isNaN(id) || id < 1) {
-      return errorResponse(res, 'El id del paciente no es valido', 400);
+      return errorResponse(res, 'ID del paciente no válido', 400);
     }
     
     const deleted = await patientService.deletePatient(id);
@@ -147,7 +131,7 @@ async function deletePatient(req, res) {
     
     return successResponse(res, null, 'Paciente eliminado exitosamente');
   } catch (error) {
-    console.error('ERROR en el controlador deletePatient:', error);
+    console.error('ERROR en controlador deletePatient:', error);
     return errorResponse(res, 'Error al eliminar el paciente', 500);
   }
 }

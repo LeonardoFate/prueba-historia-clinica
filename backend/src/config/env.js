@@ -8,7 +8,7 @@ class EnvConfig {
 
   load() {
     if (this.loaded) {
-      return; 
+      return;
     }
 
     const env = process.env.NODE_ENV || 'development';
@@ -18,7 +18,6 @@ class EnvConfig {
     if (!fs.existsSync(envPath)) {
       console.warn(`Warning: ${envFile} not found at ${envPath}`);
       
-      // cargar .env como fallback
       if (env === 'test') {
         const fallbackPath = path.resolve(process.cwd(), '.env');
         if (fs.existsSync(fallbackPath)) {
@@ -39,9 +38,6 @@ class EnvConfig {
 
   validate() {
     const required = [
-      'DB_USER',
-      'DB_PASSWORD',
-      'DB_CONNECTION_STRING',
       'PORT'
     ];
 

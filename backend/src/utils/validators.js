@@ -1,4 +1,3 @@
-
 // Valida si un email tiene formato válido
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,7 +12,6 @@ function isValidPhone(phone) {
 
 // Valida si una fecha no es futura y está en rango realista
 function isValidBirthDate(date) {
-  // Validar formato YYYY-MM-DD
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (!dateRegex.test(date)) {
     return false;
@@ -21,25 +19,21 @@ function isValidBirthDate(date) {
   
   const birthDate = new Date(date);
   
-  // Verificar que sea una fecha válida
   if (isNaN(birthDate.getTime())) {
     return false;
   }
   
-  // Verificar que no sea futura
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   if (birthDate > today) {
     return false;
   }
   
-  // Verificar rango realista (no menor a 1900)
   const minDate = new Date('1900-01-01');
   if (birthDate < minDate) {
     return false;
   }
   
-  // Verificar que no sea mayor a 150 años
   const maxAge = new Date();
   maxAge.setFullYear(maxAge.getFullYear() - 150);
   if (birthDate < maxAge) {
@@ -60,7 +54,6 @@ function isNotEmpty(str) {
 function validatePatientData(data) {
   const errors = [];
 
-  // Validar que data sea un objeto válido
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     errors.push('Los datos deben ser un objeto JSON válido');
     return { isValid: false, errors };
@@ -86,7 +79,6 @@ function validatePatientData(data) {
     errors.push('La fecha de nacimiento debe ser texto en formato YYYY-MM-DD');
   }
 
-  // Si hay errores de tipo, retornar inmediatamente
   if (errors.length > 0) {
     return { isValid: false, errors };
   }
@@ -134,24 +126,10 @@ function validatePatientData(data) {
   };
 }
 
-// Sanitiza el término de búsqueda para inyecciones
-function sanitizeSearchTerm(search) {
-  if (!search || typeof search !== 'string') {
-    return '';
-  }
-  
-  // Escapar caracteres especiales de SQL LIKE
-  return search
-    .replace(/\\/g, '\\\\')  
-    .replace(/%/g, '\\%')    
-    .replace(/_/g, '\\_');   
-}
-
 module.exports = {
   isValidEmail,
   isValidPhone,
   isValidBirthDate,
   isNotEmpty,
-  validatePatientData,
-  sanitizeSearchTerm
+  validatePatientData
 };
